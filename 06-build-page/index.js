@@ -25,6 +25,7 @@ function mergeStyles(dest, src) {
   const writeStream = fs.createWriteStream(dest);
   fs.readdir(src, (err, files) => {
     let content = Array(files.length).fill('');
+    let readCount = 0;
     files.forEach((file, index) => {
       const filedir = path.join(src, file);
       fs.stat(path.join(src, file), (err, stats) => {
@@ -32,13 +33,14 @@ function mergeStyles(dest, src) {
           const stream = fs.createReadStream(filedir, 'ascii');
           stream.on('data', (chunk) => {
             content[index] += chunk;
+            readCount += 1;
+            if (readCount === files.length) {
+              content.forEach((element) => {
+                writeStream.write(element);
+              });
+            }
           });
-          stream.on('end', () => {
-            content.forEach((element) => {
-              writeStream.write(element);
-            });
-          });
-        }
+        } else readCount += 1;
       });
     });
   });
@@ -69,10 +71,7 @@ function replaceTempTags(dest, src, srcTags) {
 
 fs.mkdir(maindest, { recursive: true }, () => {
   copyDir(path.join(maindest, 'assets'), path.join(__dirname, 'assets'));
-  mergeStyles(
-    path.join(maindest, 'style.css'),
-    path.join(__dirname, 'styles'),
-  );
+  mergeStyles(path.join(maindest, 'style.css'), path.join(__dirname, 'styles'));
   replaceTempTags(
     path.join(maindest, 'index.html'),
     path.join(__dirname, 'template.html'),
