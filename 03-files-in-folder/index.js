@@ -1,7 +1,6 @@
 const fs = require('node:fs');
 const path = require('node:path');
 const dir = path.join(__dirname, 'secret-folder');
-console.log(dir);
 fs.readdir(dir, (err, files) => {
   files.forEach((file) => {
     const filedir = path.join(dir, file);
